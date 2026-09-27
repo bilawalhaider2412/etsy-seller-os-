@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isWorkspaceMember(workspaceId) {
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/workspaces/$(workspaceId)) && 
+         get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId == request.auth.uid)
+      );
+    }
+    
+    function isWorkspaceOwner(workspaceId) {
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/workspaces/$(workspaceId)) &&
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId == request.auth.uid
+      );
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      allow read, write: if isUser(userId);
+    }
+
+    // Workspaces
+    match /workspaces/{workspaceId} {
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if isWorkspaceMember(workspaceId);
+      allow update: if isWorkspaceOwner(workspaceId) || isWorkspaceMember(workspaceId);
+      allow delete: if isWorkspaceOwner(workspaceId);
+
+      // Members
+      match /members/{memberId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow write: if isWorkspaceOwner(workspaceId) || isUser(memberId);
+      }
+
+      // Shops
+      match /shops/{shopId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Products
+      match /products/{productId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Listings
+      match /listings/{listingId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Canva Designs
+      match /canvaDesigns/{designId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Integrations (Canva, Etsy metadata)
+      match /integrations/{integrationId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Brand Kit
+      match /brandKit/{kitId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Product Ideas
+      match /productIdeas/{ideaId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Keywords
+      match /keywords/{keywordId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // AI Generations
+      match /aiGenerations/{generationId} {
+        allow read, create: if isWorkspaceMember(workspaceId);
+        allow update, delete: if isWorkspaceOwner(workspaceId);
+      }
+
+      // Usage
+      match /usage/{usageId} {
+        allow read, create, update: if isWorkspaceMember(workspaceId);
+        allow delete: if isWorkspaceOwner(workspaceId);
+      }
+
+      // Analytics
+      match /analytics/{analyticsId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+      }
+
+      // Knowledge Documents
+      match /knowledgeDocuments/{docId} {
+        allow read, write: if isWorkspaceMember(workspaceId);
+        
+        match /chunks/{chunkId} {
+          allow read, write: if isWorkspaceMember(workspaceId);
+        }
+      }
+
+      // Audit Logs
+      match /auditLogs/{logId} {
+        allow read, create: if isWorkspaceMember(workspaceId);
+        allow update, delete: if false; // Append-only audit trail
+      }
+    }
+
+    // Global Subscriptions
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated(); // Restrictable in production with Admin SDK / webhooks
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Etsy Seller OS",
+  "description": "AI-powered operating system for Etsy sellers. Research profitable products, optimize SEO titles and tags, analyze competitors, generate listings, and automate shop workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,299 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents an authenticated Etsy Seller OS user profile.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name of the seller" },
+        "photoURL": { "type": "string", "description": "Avatar photo URL" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether onboarding has been completed" },
+        "plan": { "type": "string", "enum": ["Free", "Starter", "Pro", "Business"], "description": "Subscription tier" },
+        "role": { "type": "string", "enum": ["owner", "admin", "member"], "description": "User role" },
+        "activeWorkspaceId": { "type": "string", "description": "Active workspace ID" }
+      },
+      "required": ["uid"]
+    },
+    "Workspace": {
+      "title": "Workspace",
+      "description": "Multi-tenant workspace for an Etsy seller organization or shop group.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Workspace ID" },
+        "name": { "type": "string", "description": "Workspace name" },
+        "ownerId": { "type": "string", "description": "User ID of the workspace owner" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" },
+        "subscriptionId": { "type": "string", "description": "Associated Stripe subscription ID" },
+        "plan": { "type": "string", "enum": ["Free", "Starter", "Pro", "Business"], "description": "Subscription plan" }
+      },
+      "required": ["id", "name", "ownerId"]
+    },
+    "Shop": {
+      "title": "Shop",
+      "description": "An Etsy shop associated with a workspace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Shop ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "shopName": { "type": "string", "description": "Etsy shop name" },
+        "category": { "type": "string", "description": "Primary craft category" },
+        "whatYouSell": { "type": "string", "description": "Summary of items sold" },
+        "productType": { "type": "string", "enum": ["Digital", "Physical", "Both"], "description": "Product classification" },
+        "targetMarket": { "type": "string", "description": "Target buyer demographic" },
+        "listingCount": { "type": "number", "description": "Number of active listings" },
+        "monthlySales": { "type": "string", "description": "Approximate monthly revenue bracket" },
+        "primaryGoal": { "type": "string", "description": "Primary seller business goal" },
+        "etsyShopId": { "type": "string", "description": "Official Etsy shop ID" },
+        "etsyConnected": { "type": "boolean", "description": "Whether connected to Etsy API" },
+        "etsyConnectionStatus": { "type": "string", "enum": ["connected", "disconnected", "pending"], "description": "OAuth status" },
+        "lastSync": { "type": "string", "description": "Last synchronization timestamp" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" }
+      },
+      "required": ["id", "workspaceId", "shopName"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product catalog item managed within a workspace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Product ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "shopId": { "type": "string", "description": "Associated Etsy shop ID" },
+        "ownerId": { "type": "string", "description": "User ID of creator" },
+        "title": { "type": "string", "description": "Product title" },
+        "category": { "type": "string", "description": "Product category" },
+        "productType": { "type": "string", "enum": ["Digital", "Physical", "Print on Demand", "Pattern", "Template"], "description": "Format" },
+        "price": { "type": "number", "description": "Retail price" },
+        "currency": { "type": "string", "description": "Currency code" },
+        "sku": { "type": "string", "description": "SKU identifier" },
+        "status": { "type": "string", "enum": ["Idea", "Draft", "Ready", "Published", "Needs Optimization"], "description": "Lifecycle status" },
+        "seoScore": { "type": "number", "description": "SEO score from 0-100" },
+        "views": { "type": "number", "description": "Recorded views" },
+        "favorites": { "type": "number", "description": "Recorded favorites" },
+        "orders": { "type": "number", "description": "Recorded orders" },
+        "revenue": { "type": "number", "description": "Recorded gross revenue" },
+        "conversionRate": { "type": "number", "description": "Conversion rate percentage" },
+        "tags": { "type": "array", "description": "Etsy search tags" },
+        "materials": { "type": "array", "description": "Product materials" },
+        "description": { "type": "string", "description": "Product description body" },
+        "notes": { "type": "string", "description": "Internal seller notes" },
+        "imageUrl": { "type": "string", "description": "Primary product image URL" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["id", "workspaceId", "title", "price"]
+    },
+    "Listing": {
+      "title": "Listing",
+      "description": "An optimized Etsy listing draft with structured copywriting and 13 tags.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Listing ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "productId": { "type": "string", "description": "Related product ID" },
+        "shopId": { "type": "string", "description": "Related shop ID" },
+        "title": { "type": "string", "maxLength": 140, "description": "Etsy SEO title under 140 characters" },
+        "description": { "type": "string", "description": "Structured description with hook and specs" },
+        "tags": { "type": "array", "description": "13 Etsy tags (max 20 chars each)" },
+        "materials": { "type": "array", "description": "Materials used" },
+        "price": { "type": "number", "description": "Listing price" },
+        "seoScore": { "type": "number", "description": "Audit score (0-100)" },
+        "status": { "type": "string", "enum": ["draft", "active", "inactive"], "description": "Status" },
+        "aiGenerated": { "type": "boolean", "description": "Whether content was AI generated" },
+        "aiLastUpdated": { "type": "string", "description": "Timestamp of AI modification" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" }
+      },
+      "required": ["id", "workspaceId", "title", "description"]
+    },
+    "Keyword": {
+      "title": "Keyword",
+      "description": "A saved SEO keyword research entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Keyword record ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "keyword": { "type": "string", "description": "Search phrase" },
+        "category": { "type": "string", "description": "Category context" },
+        "source": { "type": "string", "enum": ["ai_generator", "verified_etsy", "manual"], "description": "Source of keyword" },
+        "relevanceScore": { "type": "number", "description": "Opportunity score (0-100)" },
+        "intent": { "type": "string", "description": "Buyer intent classification" },
+        "estimatedOpportunity": { "type": "number", "description": "Estimated search volume/opportunity" },
+        "competition": { "type": "string", "enum": ["Low", "Medium", "High"], "description": "Competition indicator" },
+        "metricType": { "type": "string", "enum": ["ai_estimate", "verified_source"], "description": "Data type" },
+        "saved": { "type": "boolean", "description": "Whether saved by seller" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["id", "workspaceId", "keyword"]
+    },
+    "ProductIdea": {
+      "title": "ProductIdea",
+      "description": "A brainstormed product concept with differentiation angle.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Idea ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "title": { "type": "string", "description": "Concept name" },
+        "description": { "type": "string", "description": "Detailed explanation" },
+        "category": { "type": "string", "description": "Category" },
+        "targetCustomer": { "type": "string", "description": "Target buyer profile" },
+        "keywords": { "type": "array", "description": "Relevant search queries" },
+        "suggestedPrice": { "type": "string", "description": "Suggested retail price range" },
+        "difficulty": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"], "description": "Crafting difficulty" },
+        "demandEstimate": { "type": "string", "enum": ["Low", "Medium", "High", "Very High"], "description": "Demand level" },
+        "opportunityScore": { "type": "number", "description": "Composite score (0-100)" },
+        "source": { "type": "string", "description": "Source of idea" },
+        "isAiEstimate": { "type": "boolean", "description": "Indicates AI estimate label" },
+        "saved": { "type": "boolean", "description": "Whether saved to library" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["id", "workspaceId", "title"]
+    },
+    "AIGeneration": {
+      "title": "AIGeneration",
+      "description": "Log of an AI generation request and token consumption.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Generation record ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "userId": { "type": "string", "description": "Requesting user ID" },
+        "type": { "type": "string", "enum": ["listing", "seo", "product_idea", "competitor_analysis", "customer_reply", "shop_audit", "copilot"], "description": "Tool feature type" },
+        "prompt": { "type": "string", "description": "Summary prompt string" },
+        "result": { "type": "string", "description": "Truncated result summary" },
+        "model": { "type": "string", "description": "AI model alias" },
+        "tokensUsed": { "type": "number", "description": "Token consumption" },
+        "status": { "type": "string", "enum": ["completed", "failed"], "description": "Execution status" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["id", "workspaceId", "userId", "type"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Append-only security and operational audit trail.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log entry ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "userId": { "type": "string", "description": "User ID who performed action" },
+        "action": { "type": "string", "description": "Action name" },
+        "resource": { "type": "string", "description": "Target collection or resource" },
+        "resourceId": { "type": "string", "description": "Target document ID" },
+        "timestamp": { "type": "string", "description": "Timestamp" },
+        "metadata": { "type": "object", "description": "Additional event context" }
+      },
+      "required": ["id", "workspaceId", "userId", "action", "resource"]
+    },
+    "CanvaDesign": {
+      "title": "CanvaDesign",
+      "description": "A Canva graphic design document connected to an Etsy product or listing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Design record ID" },
+        "workspaceId": { "type": "string", "description": "Parent workspace ID" },
+        "userId": { "type": "string", "description": "User ID of creator" },
+        "productId": { "type": "string", "description": "Associated product ID" },
+        "listingId": { "type": "string", "description": "Associated Etsy listing ID" },
+        "canvaDesignId": { "type": "string", "description": "Canva platform design identifier" },
+        "designName": { "type": "string", "description": "Name of the design" },
+        "designType": { "type": "string", "description": "Category of design (etsy_listing, pinterest, instagram, promo)" },
+        "templateId": { "type": "string", "description": "Template ID used" },
+        "thumbnailUrl": { "type": "string", "description": "Preview thumbnail image URL" },
+        "canvaUrl": { "type": "string", "description": "Canva edit / view URL" },
+        "status": { "type": "string", "enum": ["draft", "in_progress", "completed", "attached"], "description": "Design status" },
+        "layoutStyle": { "type": "string", "description": "Design layout style" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" }
+      },
+      "required": ["id", "workspaceId", "designName", "designType"]
+    },
+    "CanvaIntegration": {
+      "title": "CanvaIntegration",
+      "description": "Canva connection metadata for a workspace.",
+      "type": "object",
+      "properties": {
+        "canvaConnected": { "type": "boolean", "description": "Connection flag" },
+        "canvaUserId": { "type": "string", "description": "Authorized Canva user ID" },
+        "connectionStatus": { "type": "string", "enum": ["connected", "disconnected", "error"], "description": "Connection state" },
+        "scopes": { "type": "array", "description": "Granted OAuth scopes" },
+        "createdAt": { "type": "string", "description": "Connection timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" }
+      },
+      "required": ["canvaConnected", "connectionStatus"]
+    },
+    "BrandKit": {
+      "title": "BrandKit",
+      "description": "Shop visual brand guidelines and identity.",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string", "description": "Brand name" },
+        "primaryColor": { "type": "string", "description": "Primary brand HEX color" },
+        "secondaryColor": { "type": "string", "description": "Secondary brand HEX color" },
+        "accentColor": { "type": "string", "description": "Accent brand HEX color" },
+        "headingFont": { "type": "string", "description": "Heading font family" },
+        "bodyFont": { "type": "string", "description": "Body font family" },
+        "style": { "type": "string", "description": "Visual style description" },
+        "tone": { "type": "string", "description": "Brand copy voice" },
+        "shopUrl": { "type": "string", "description": "Etsy store URL" },
+        "socialHandles": { "type": "string", "description": "Social media handles" },
+        "updatedAt": { "type": "string", "description": "Last updated" }
+      },
+      "required": ["brandName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User account profiles."
+    },
+    "/workspaces/{workspaceId}": {
+      "schema": "Workspace",
+      "description": "Multi-tenant workspaces."
+    },
+    "/workspaces/{workspaceId}/shops/{shopId}": {
+      "schema": "Shop",
+      "description": "Etsy shops connected to a workspace."
+    },
+    "/workspaces/{workspaceId}/products/{productId}": {
+      "schema": "Product",
+      "description": "Catalog of products managed by a workspace."
+    },
+    "/workspaces/{workspaceId}/listings/{listingId}": {
+      "schema": "Listing",
+      "description": "SEO optimized listing drafts."
+    },
+    "/workspaces/{workspaceId}/keywords/{keywordId}": {
+      "schema": "Keyword",
+      "description": "Keyword database entries."
+    },
+    "/workspaces/{workspaceId}/productIdeas/{ideaId}": {
+      "schema": "ProductIdea",
+      "description": "Product idea records."
+    },
+    "/workspaces/{workspaceId}/aiGenerations/{generationId}": {
+      "schema": "AIGeneration",
+      "description": "AI generation logs."
+    },
+    "/workspaces/{workspaceId}/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Append-only workspace audit logs."
+    },
+    "/workspaces/{workspaceId}/canvaDesigns/{designId}": {
+      "schema": "CanvaDesign",
+      "description": "Canva graphic designs created for products or listings."
+    },
+    "/workspaces/{workspaceId}/integrations/{integrationId}": {
+      "schema": "CanvaIntegration",
+      "description": "Canva and other third-party integration statuses."
+    },
+    "/workspaces/{workspaceId}/brandKit/{kitId}": {
+      "schema": "BrandKit",
+      "description": "Workspace brand guidelines and typography/color kit."
+    }
+  }
+}
